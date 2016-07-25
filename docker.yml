@@ -1,0 +1,15 @@
+---
+- name: install docker | docker
+  gather_facts: yes
+  hosts: all 
+  become: yes
+  vars_prompt:
+    - name: "keepalived_role"
+      prompt: "MASTER or BACKUP"
+      private: no
+  roles:
+    - role: keepalived
+      tags: ["keepalived"]
+
+    - role: docker
+      tags: ["docker"]

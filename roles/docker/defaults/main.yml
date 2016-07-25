@@ -1,0 +1,11 @@
+---
+docker_debug: False
+cert: crtrootkey.pem
+container_name: haproxy_container
+vip: 10.10.24.200
+tports: 
+  - 80
+  - 443 
+ports: 
+  - { port: '80', mapping: '80:80', fwport: '80/tcp', permanent: 'true' }
+  - { port: '443', mapping: '443:443', fwport: '443/tcp', permanent: 'true' }

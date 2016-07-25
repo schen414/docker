@@ -1,0 +1,49 @@
+! Configuration File for keepalived
+global_defs {
+}
+
+vrrp_script chk_haproxy {           # Requires keepalived-1.1.13
+        script {{ check_script }}     # docker inspect for pid != 0
+        interval 2                      # check every 2 seconds
+        weight 2                        # add 2 points of prio if OK
+}
+
+vrrp_instance VI_1 {
+    state {{ keepalived_role }}
+    interface {{ iface }}
+    virtual_router_id {{ vip }}
+
+    {% if keepalived_role.lower() == "master" %}
+    priority 101          #101 - MASTER | 100 - BACKUP
+    {% else %}
+    priority 100          #101 - MASTER | 100 - BACKUP
+    {% endif %}   
+    advert_int 1
+
+
+    	track_script {
+      	  chk_haproxy
+    	}
+
+    	
+	{% if keepalived_role.lower() == "master" %}
+	unicast_src_ip {{ master_ip }}
+        {% else %}
+	unicast_src_ip {{ backup_ip }}
+        {% endif %}
+
+    	unicast_peer
+    	{
+          {% if keepalived_role.lower() == "master" %}
+	  {{ backup_ip }}
+	  {% else %}
+	  {{ master_ip }}
+	  {% endif % }
+    	}
+
+    	virtual_ipaddress {
+          {{ vip }}
+    	}
+}
+
+
